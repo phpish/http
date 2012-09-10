@@ -1,37 +1,41 @@
 <?php
 
+	namespace phpish\curl;
 
-	class WcurlException extends Exception { }
 
-	function wcurl($method, $url, $query='', $payload='', $request_headers=array(), &$response_headers=array(), $curl_opts=array())
+	class CurlException extends \Exception { }
+
+	const HTTP_CLIENT_USERAGENT = 'phpish/curl';
+
+	function http_client($method, $url, $query='', $payload='', $request_headers=array(), &$response_headers=array(), $curl_opts=array())
 	{
-		$ch = curl_init(wcurl_request_uri($url, $query));
-		wcurl_setopts($ch, $method, $payload, $request_headers, $curl_opts);
+		$ch = curl_init(_http_client_request_uri($url, $query));
+		_http_client_setopts($ch, $method, $payload, $request_headers, $curl_opts);
 		$response = curl_exec($ch);
 		$curl_info = curl_getinfo($ch);
 		$errno = curl_errno($ch);
 		$error = curl_error($ch);
 		curl_close($ch);
 
-		if ($errno) throw new WcurlException($error, $errno);
+		if ($errno) throw new CurlException($error, $errno);
 
 		$header_size = $curl_info["header_size"];
 		$msg_header = substr($response, 0, $header_size);
 		$msg_body = substr($response, $header_size);
 
-		$response_headers = wcurl_response_headers($msg_header);
-
+		$response_headers = _http_client_response_headers($msg_header);
+// TODO: Throw exception if status code is >= 400
 		return $msg_body;
 	}
 
-		function wcurl_request_uri($url, $query)
+		function _http_client_request_uri($url, $query)
 		{
 			if (empty($query)) return $url;
 			if (is_array($query)) return "$url?".http_build_query($query);
 			else return "$url?$query";
 		}
 
-		function wcurl_setopts($ch, $method, $payload, $request_headers, $curl_opts)
+		function _http_client_setopts($ch, $method, $payload, $request_headers, $curl_opts)
 		{
 			$default_curl_opts = array
 			(
@@ -41,7 +45,7 @@
 				CURLOPT_MAXREDIRS => 3,
 				CURLOPT_SSL_VERIFYPEER => true,
 				CURLOPT_SSL_VERIFYHOST => 2,
-				CURLOPT_USERAGENT => 'wcurl',
+				CURLOPT_USERAGENT => HTTP_CLIENT_USERAGENT,
 				CURLOPT_CONNECTTIMEOUT => 30,
 				CURLOPT_TIMEOUT => 30,
 			);
@@ -54,7 +58,7 @@
 			{
 				$default_curl_opts[CURLOPT_CUSTOMREQUEST] = $method;
 
-				// Disable cURL's default 100-continue expectation
+				// This disables cURL's default 100-continue expectation
 				if ('POST' == $method) array_push($request_headers, 'Expect:');
 
 				if (!empty($payload))
@@ -76,7 +80,7 @@
 			foreach ($overriden_opts as $curl_opt=>$value) curl_setopt($ch, $curl_opt, $value);
 		}
 
-		function wcurl_response_headers($msg_header)
+		function _http_client_response_headers($msg_header)
 		{
 
 			$multiple_headers = preg_split("/\r\n\r\n|\n\n|\r\r/", trim($msg_header));
