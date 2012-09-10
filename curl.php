@@ -6,7 +6,7 @@
 	class CurlException extends \Exception { }
 
 	const HTTP_CLIENT_USERAGENT = 'phpish/curl';
-
+// TODO: for copy/paste convenience, combine $method and $url into one string param. e.g., 'GET /'
 	function http_client($method, $url, $query='', $payload='', $request_headers=array(), &$response_headers=array(), $curl_opts=array())
 	{
 		$ch = curl_init(_http_client_request_uri($url, $query));
