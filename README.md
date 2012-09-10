@@ -90,7 +90,7 @@ string __http_client__( string _$method_ , string _$url_ [, mixed _$query_ [, mi
 	);
 
 
-	// If you find yourself passing the same `$curl_opts` all over the place, do this instead:
+	// If you find yourself passing the same $curl_opts all over the place, do this instead:
 	function client_with_custom_curl_opts($custom_curl_opts)
 	{
 		return function ($method, $url, $query='', $payload='', $request_headers=array(), &$response_headers=array(), $curl_opts_override=array()) use ($custom_curl_opts)
