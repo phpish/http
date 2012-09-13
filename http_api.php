@@ -4,20 +4,23 @@
 
 	const USERAGENT = 'phpish/http_api';
 
+// TODO: https://github.com/sandeepshetty/wcurl/issues/1
+// TODO: automatically encode json based on content-type ??
 
-// TODO: automatically decode json based on content-type - somehow do this for sending as well?
 	function client($base_uri='', $instance_curl_opts=array())
 	{
-		return function ($method, $uri, $query='', $payload='', $request_headers=array(), &$response_headers=array(), $curl_opts_override=array()) use ($base_uri, $instance_curl_opts)
+		return function ($method_uri, $query='', $payload='', $request_headers=array(), &$response_headers=array(), $curl_opts_override=array()) use ($base_uri, $instance_curl_opts)
 		{
+			list($method, $uri) = explode(' ', $method_uri, 2);
 			$uri = ('/' == $uri[0]) ? $base_uri.$uri : $uri;
 			$curl_opts = $curl_opts_override + $instance_curl_opts;
-			return request($method, $uri, $query, $payload, $request_headers, $response_headers, $curl_opts);
+			return request("$method $uri", $query, $payload, $request_headers, $response_headers, $curl_opts);
 		};
 	}
 
-	function request($method, $uri, $query='', $payload='', $request_headers=array(), &$response_headers=array(), $curl_opts=array())
+	function request($method_uri, $query='', $payload='', $request_headers=array(), &$response_headers=array(), $curl_opts=array())
 	{
+		list($method, $uri) = explode(' ', $method_uri, 2);
 		$ch = curl_init(_http_client_request_uri($uri, $query));
 		_http_client_setopts($ch, $method, $payload, $request_headers, $curl_opts);
 		$response = curl_exec($ch);
@@ -38,6 +41,8 @@
 		{
 			throw new HttpClientResponseException(compact('method', 'url', 'query', 'payload', 'request_headers', 'response_headers', 'msg_body'));
 		}
+
+		$msg_body = (false !== strpos($response_headers['content-type'], 'application/json')) ? json_decode($msg_body, true) : $msg_body;
 
 		return $msg_body;
 	}
