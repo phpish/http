@@ -1,15 +1,24 @@
 <?php
 
-	namespace phpish\curl;
+	namespace phpish\http_api;
+
+	const USERAGENT = 'phpish/http_api';
 
 
-	class CurlException extends \Exception { }
-
-	const HTTP_CLIENT_USERAGENT = 'phpish/curl';
-// TODO: for copy/paste convenience, combine $method and $url into one string param. e.g., 'GET /'
-	function http_client($method, $url, $query='', $payload='', $request_headers=array(), &$response_headers=array(), $curl_opts=array())
+// TODO: automatically decode json based on content-type - somehow do this for sending as well?
+	function client($base_uri='', $instance_curl_opts=array())
 	{
-		$ch = curl_init(_http_client_request_uri($url, $query));
+		return function ($method, $uri, $query='', $payload='', $request_headers=array(), &$response_headers=array(), $curl_opts_override=array()) use ($base_uri, $instance_curl_opts)
+		{
+			$uri = ('/' == $uri[0]) ? $base_uri.$uri : $uri;
+			$curl_opts = $curl_opts_override + $instance_curl_opts;
+			return request($method, $uri, $query, $payload, $request_headers, $response_headers, $curl_opts);
+		};
+	}
+
+	function request($method, $uri, $query='', $payload='', $request_headers=array(), &$response_headers=array(), $curl_opts=array())
+	{
+		$ch = curl_init(_http_client_request_uri($uri, $query));
 		_http_client_setopts($ch, $method, $payload, $request_headers, $curl_opts);
 		$response = curl_exec($ch);
 		$curl_info = curl_getinfo($ch);
@@ -24,7 +33,12 @@
 		$msg_body = substr($response, $header_size);
 
 		$response_headers = _http_client_response_headers($msg_header);
-// TODO: Throw exception if status code is >= 400
+
+		if ($response_headers['http_status_code'] >= 400)
+		{
+			throw new HttpClientResponseException(compact('method', 'url', 'query', 'payload', 'request_headers', 'response_headers', 'msg_body'));
+		}
+
 		return $msg_body;
 	}
 
@@ -45,7 +59,7 @@
 				CURLOPT_MAXREDIRS => 3,
 				CURLOPT_SSL_VERIFYPEER => true,
 				CURLOPT_SSL_VERIFYHOST => 2,
-				CURLOPT_USERAGENT => HTTP_CLIENT_USERAGENT,
+				CURLOPT_USERAGENT => USERAGENT,
 				CURLOPT_CONNECTTIMEOUT => 30,
 				CURLOPT_TIMEOUT => 30,
 			);
@@ -97,5 +111,20 @@
 
 			return $response_headers;
 		}
+
+
+	class CurlException extends \Exception { }
+	class HttpClientResponseException extends \Exception
+	{
+		protected $info;
+
+		function __construct($info)
+		{
+			$this->info = $info;
+			parent::__construct($info['response_headers']['http_status_message'], $info['response_headers']['http_status_code']);
+		}
+
+		function getInfo() { $this->info; }
+	}
 
 ?>
