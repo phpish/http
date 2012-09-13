@@ -5,7 +5,6 @@
 	const USERAGENT = 'phpish/http_api';
 
 // TODO: https://github.com/sandeepshetty/wcurl/issues/1
-// TODO: automatically encode json based on content-type ??
 
 	function client($base_uri='', $instance_curl_opts=array())
 	{
@@ -39,7 +38,7 @@
 
 		if ($response_headers['http_status_code'] >= 400)
 		{
-			throw new HttpClientResponseException(compact('method', 'url', 'query', 'payload', 'request_headers', 'response_headers', 'msg_body'));
+			throw new HttpResponseException(compact('method', 'url', 'query', 'payload', 'request_headers', 'response_headers', 'msg_body'));
 		}
 
 		$msg_body = (false !== strpos($response_headers['content-type'], 'application/json')) ? json_decode($msg_body, true) : $msg_body;
@@ -54,7 +53,7 @@
 			else return "$url?$query";
 		}
 
-		function _http_client_setopts($ch, $method, $payload, $request_headers, $curl_opts)
+		function _http_client_setopts($ch, $method, $payload, $request_headers_assoc, $curl_opts)
 		{
 			$default_curl_opts = array
 			(
@@ -69,6 +68,10 @@
 				CURLOPT_TIMEOUT => 30,
 			);
 
+			$request_headers = array();
+			foreach ($request_headers_assoc as $key=>$val) { $request_headers_assoc_lower[strtolower($key)] = $val; }
+			$request_headers_assoc = $request_headers_assoc_lower;
+
 			if ('GET' == $method)
 			{
 				$default_curl_opts[CURLOPT_HTTPGET] = true;
@@ -80,19 +83,28 @@
 				// This disables cURL's default 100-continue expectation
 				if ('POST' == $method) array_push($request_headers, 'Expect:');
 
-				if (!empty($payload))
+				if (is_array($payload))
 				{
-					if (is_array($payload))
+					if (isset($request_headers_assoc['content-type']))
 					{
-						$payload = http_build_query($payload);
-						array_push($request_headers, 'Content-Type: application/x-www-form-urlencoded; charset=utf-8');
+						if (false !== strpos($request_headers_assoc['content-type'], 'application/x-www-form-urlencoded'))
+						{
+							$payload = http_build_query($payload);
+						}
 
+						// TODO: Content-Type: application/xml ?
 					}
-
-					$default_curl_opts[CURLOPT_POSTFIELDS] = $payload;
+					else
+					{
+						$payload = stripslashes(json_encode($payload));
+						array_push($request_headers, 'Content-Type: application/json; charset=utf-8');
+					}
 				}
+
+				if (!empty($payload)) $default_curl_opts[CURLOPT_POSTFIELDS] = $payload;
 			}
 
+			foreach ($request_headers_assoc as $key=>$val) { $request_headers[] = "$key: $val"; }
 			if (!empty($request_headers)) $default_curl_opts[CURLOPT_HTTPHEADER] = $request_headers;
 
 			$overriden_opts = $curl_opts + $default_curl_opts;
@@ -119,7 +131,7 @@
 
 
 	class CurlException extends \Exception { }
-	class HttpClientResponseException extends \Exception
+	class HttpResponseException extends \Exception
 	{
 		protected $info;
 
