@@ -81,7 +81,7 @@
 				$default_curl_opts[CURLOPT_CUSTOMREQUEST] = $method;
 
 				// This disables cURL's default 100-continue expectation
-				if ('POST' == $method) array_push($request_headers, 'Expect:');
+				if ('POST' == $method) $request_headers[] = 'Expect:';
 
 				if (is_array($payload))
 				{
@@ -97,7 +97,7 @@
 					else
 					{
 						$payload = stripslashes(json_encode($payload));
-						array_push($request_headers, 'Content-Type: application/json; charset=utf-8');
+						$request_headers[] = 'Content-Type: application/json; charset=utf-8';
 					}
 				}
 
