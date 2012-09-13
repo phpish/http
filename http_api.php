@@ -68,7 +68,7 @@
 				CURLOPT_TIMEOUT => 30,
 			);
 
-			$request_headers = array();
+			$request_headers = $request_headers_assoc_lower = array();
 			foreach ($request_headers_assoc as $key=>$val) { $request_headers_assoc_lower[strtolower($key)] = $val; }
 			$request_headers_assoc = $request_headers_assoc_lower;
 
