@@ -38,7 +38,7 @@
 
 		if ($response_headers['http_status_code'] >= 400)
 		{
-			throw new HttpResponseException(compact('method', 'url', 'query', 'payload', 'request_headers', 'response_headers', 'msg_body'));
+			throw new ResponseException(compact('method', 'url', 'query', 'payload', 'request_headers', 'response_headers', 'msg_body'));
 		}
 
 		$msg_body = (false !== strpos($response_headers['content-type'], 'application/json')) ? json_decode($msg_body, true) : $msg_body;
@@ -134,7 +134,7 @@
 
 
 	class CurlException extends \Exception { }
-	class HttpResponseException extends \Exception
+	class ResponseException extends \Exception
 	{
 		protected $info;
 
