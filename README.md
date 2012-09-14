@@ -76,8 +76,8 @@ callback __client__( string _$base_uri_ [, array _$curl_opts_ ] )
 	(
 		'POST https://api.github.com/gists',
 		NULL,
-		stripslashes(json_encode(array('description'=>'test gist', 'public'=>true, 'files'=>array('42.txt'=>array('content'=>'The Answer to the Ultimate Question of Life, the Universe, and Everything'))))),
-		array('Content-Type: application/json; charset=utf-8'),
+		array('description'=>'test gist', 'public'=>true, 'files'=>array('42.txt'=>array('content'=>'The Answer to the Ultimate Question of Life, the Universe, and Everything'))),
+		array(), // If previous parameter was an array, auto encodes to json and sets 'Content-Type' to 'application/json; charset=utf-8'
 		$response_headers,	// This variable is filled with the response headers
 		array(CURLOPT_USERAGENT=>'MY_APP_NAME')
 	);

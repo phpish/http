@@ -91,7 +91,10 @@
 						{
 							$payload = http_build_query($payload);
 						}
-
+						elseif (false !== strpos($request_headers_assoc['content-type'], 'application/json'))
+						{
+							$payload = stripslashes(json_encode($payload));
+						}
 						// TODO: Content-Type: application/xml ?
 					}
 					else
