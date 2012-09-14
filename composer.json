@@ -1,9 +1,9 @@
 {
-	"name": "phpish/curl",
+	"name": "phpish/http_api",
 	"type": "library",
-	"description": "A convenience wrapper around PHP's cURL library",
+	"description": "A convenience wrapper around PHP's cURL library for consuming HTTP APIs",
 	"keywords": ["curl","http","api"],
-	"homepage": "https://github.com/phpish/curl",
+	"homepage": "https://github.com/phpish/http_api",
 	"license": "MIT",
 	"authors": [
 		{
@@ -14,6 +14,6 @@
 		}
 	],
 	"require": {
-		"php": ">=5.0.0"
+		"php": ">=5.3.0"
 	}
 }
