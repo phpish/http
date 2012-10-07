@@ -99,8 +99,8 @@
 					}
 					else
 					{
-						$payload = stripslashes(json_encode($payload));
-						$request_headers[] = 'Content-Type: application/json; charset=utf-8';
+						$payload = http_build_query($payload);
+						$request_headers[] = 'Content-Type: application/x-www-form-urlencoded';
 					}
 				}
 
