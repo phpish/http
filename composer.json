@@ -1,16 +1,15 @@
 {
-	"name": "phpish/http_api",
+	"name": "phpish/http",
 	"type": "library",
-	"description": "A convenience wrapper around PHP's cURL library for consuming HTTP APIs",
+	"description": "Convenience wrapper around PHP's cURL library for making HTTP requests",
 	"keywords": ["curl","http","api"],
-	"homepage": "https://github.com/phpish/http_api",
+	"homepage": "https://github.com/phpish/http",
 	"license": "MIT",
 	"authors": [
 		{
 			"name": "Sandeep Shetty",
 			"email": "sandeep.shetty@gmail.com",
-			"homepage": "http://sandeep.shetty.in",
-			"role": "Developer"
+			"homepage": "http://sandeep.shetty.in"
 		}
 	],
 	"require": {

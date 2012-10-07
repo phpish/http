@@ -1,10 +1,10 @@
 <?php
 
-	namespace phpish\http_api;
+	namespace phpish\http;
 
-	const USERAGENT = 'phpish/http_api';
+	const USERAGENT = 'phpish/http';
 
-// TODO: https://github.com/sandeepshetty/wcurl/issues/1
+	// TODO: https://github.com/sandeepshetty/wcurl/issues/1
 
 	function client($base_uri='', $instance_curl_opts=array())
 	{
