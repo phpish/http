@@ -1,7 +1,7 @@
 {
 	"name": "phpish/http",
 	"type": "library",
-	"description": "Convenience wrapper for making HTTP requests",
+	"description": "Convenience wrapper around cURL",
 	"keywords": ["curl","http","api"],
 	"homepage": "https://github.com/phpish/http",
 	"license": "MIT",
