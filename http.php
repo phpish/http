@@ -59,7 +59,8 @@
 			(
 				CURLOPT_HEADER => true,
 				CURLOPT_RETURNTRANSFER => true,
-				CURLOPT_FOLLOWLOCATION => true,
+				# http://www.php.net/manual/en/function.curl-setopt.php#71313
+				# CURLOPT_FOLLOWLOCATION => true,
 				CURLOPT_MAXREDIRS => 3,
 				CURLOPT_SSL_VERIFYPEER => true,
 				CURLOPT_SSL_VERIFYHOST => 2,
