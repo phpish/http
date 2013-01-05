@@ -6,7 +6,6 @@
 
 	try
 	{
-
 		# Example 1: Basic GET request
 		$response_body = http\request('GET http://httpbin.org/get');
 		print_r($response_body);
@@ -66,14 +65,18 @@
 		$response_body = $http_client('POST /post', array(), array('hello'=>'world', 'foo'=>'bar'));
 		print_r($response_body);
 
+
+		# Example 8: Raise ResponseException
+		$response_body = http\request('GET http://httpbin.org/status/500');
+
 	}
-	catch (ResponseException $e)
+	catch (http\ResponseException $e) # HTTP response status code was >= 400
 	{
-		# HTTP response status code was >= 400
+		print_r($e->info());
 	}
-	catch (CurlException $e)
+	catch (http\CurlException $e) # cURL error
 	{
-		// cURL error
+		print_r($e);
 	}
 
 ?>
