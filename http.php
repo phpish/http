@@ -6,18 +6,19 @@
 
 	// TODO: https://github.com/sandeepshetty/wcurl/issues/1
 
-	function client($base_uri='', $instance_curl_opts=array())
+	function client($base_uri='', $instance_request_headers=array(), $instance_curl_opts=array())
 	{
-		return function ($method_uri, $query='', $payload='', $request_headers=array(), &$response_headers=array(), $curl_opts_override=array()) use ($base_uri, $instance_curl_opts)
+		return function ($method_uri, $query='', $payload='', &$response_headers=array(), $request_headers_override=array(), $curl_opts_override=array()) use ($base_uri, $instance_request_headers, $instance_curl_opts)
 		{
 			list($method, $uri) = explode(' ', $method_uri, 2);
 			$uri = ('/' == $uri[0]) ? $base_uri.$uri : $uri;
+			$request_headers = $request_headers_override + $instance_request_headers;
 			$curl_opts = $curl_opts_override + $instance_curl_opts;
-			return request("$method $uri", $query, $payload, $request_headers, $response_headers, $curl_opts);
+			return request("$method $uri", $query, $payload, $response_headers, $request_headers, $curl_opts);
 		};
 	}
 
-	function request($method_uri, $query='', $payload='', $request_headers=array(), &$response_headers=array(), $curl_opts=array())
+	function request($method_uri, $query='', $payload='', &$response_headers=array(), $request_headers=array(), $curl_opts=array())
 	{
 		list($method, $uri) = explode(' ', $method_uri, 2);
 		$ch = curl_init(_http_client_request_uri($uri, $query));
@@ -96,7 +97,6 @@
 						{
 							$payload = stripslashes(json_encode($payload));
 						}
-						// TODO: Content-Type: application/xml ?
 					}
 					else
 					{
