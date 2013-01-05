@@ -145,7 +145,7 @@
 			parent::__construct($info['response_headers']['http_status_message'], $info['response_headers']['http_status_code']);
 		}
 
-		function info() { $this->info; }
+		function info() { return $this->info; }
 	}
 
 ?>
