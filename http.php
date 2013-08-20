@@ -39,7 +39,7 @@
 
 		if ($response_headers['http_status_code'] >= 400)
 		{
-			throw new ResponseException(compact('method', 'uri', 'query', 'payload', 'request_headers', 'response_headers', 'msg_body'));
+			throw new ResponseException(compact('method', 'uri', 'query', 'payload', 'request_headers', 'curl_opts', 'response_headers', 'msg_body'));
 		}
 
 		$msg_body = (false !== strpos($response_headers['content-type'], 'application/json')) ? json_decode($msg_body, true) : $msg_body;
@@ -47,11 +47,11 @@
 		return $msg_body;
 	}
 
-		function _http_client_request_uri($url, $query)
+		function _http_client_request_uri($uri, $query)
 		{
-			if (empty($query)) return $url;
-			if (is_array($query)) return "$url?".http_build_query($query);
-			else return "$url?$query";
+			if (empty($query)) return $uri;
+			if (is_array($query)) return "$uri?".http_build_query($query);
+			else return "$uri?$query";
 		}
 
 		function _http_client_setopts($ch, $method, $payload, $request_headers_assoc, $curl_opts)
@@ -95,7 +95,7 @@
 						}
 						elseif (false !== strpos($request_headers_assoc['content-type'], 'application/json'))
 						{
-							$payload = stripslashes(json_encode($payload));
+							$payload = json_encode($payload);
 						}
 					}
 					else
@@ -127,7 +127,15 @@
 			foreach ($header_lines as $header_line)
 			{
 				list($name, $value) = explode(':', $header_line, 2);
-				$response_headers[strtolower($name)] = trim($value);
+				$name = trim(strtolower($name));
+				$value = trim($value);
+				if (isset($response_headers[$name])) {
+					$response_headers[$name] = array (
+						$response_headers[$name],
+						$value
+					);
+				}
+				else $response_headers[$name] = $value;
 			}
 
 			return $response_headers;
