@@ -23,4 +23,4 @@ callback __client__( string _$base_uri_ [, array _$request_headers__ [, array _$
 
 ## Usage
 
-See `example.php`
+See `.example.php`
