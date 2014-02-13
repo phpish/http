@@ -29,18 +29,19 @@
 		$error = curl_error($ch);
 		curl_close($ch);
 
-		if ($errno) throw new CurlException($error, $errno);
+		if ($errno) throw new CurlException($error, $errno, compact('method', 'uri', 'query', 'request_headers', 'payload', 'curl_opts'));
 
 		$header_size = $curl_info["header_size"];
 		$msg_header = substr($response, 0, $header_size);
 		$msg_body = substr($response, $header_size);
 
 		$response_headers = _http_client_response_headers($msg_header);
+		$http_status_message = $response_headers['http_status_message'];
+		$http_status_code = $response_headers['http_status_code'];
 
-		if ($response_headers['http_status_code'] >= 400)
-		{
-			throw new ResponseException(compact('method', 'uri', 'query', 'payload', 'request_headers', 'curl_opts', 'response_headers', 'msg_body'));
-		}
+		if ($http_status_code >= 400) throw new ResponseException($http_status_message, $http_status_code, compact('method', 'uri', 'query', 'request_headers', 'payload', 'response_headers', 'msg_body', 'curl_opts'));
+
+
 
 		$msg_body = (false !== strpos($response_headers['content-type'], 'application/json')) ? json_decode($msg_body, true) : $msg_body;
 
@@ -51,7 +52,7 @@
 		{
 			if (empty($query)) return $uri;
 			if (is_array($query)) return "$uri?".http_build_query($query);
-			else return "$uri?$query";
+			return "$uri?$query";
 		}
 
 		function _http_client_setopts($ch, $method, $payload, $request_headers_assoc, $curl_opts)
@@ -142,18 +143,25 @@
 		}
 
 
-	class CurlException extends \Exception { }
-	class ResponseException extends \Exception
+	class Exception extends \Exception
 	{
 		protected $info;
 
-		function __construct($info)
+		function __construct($message, $code, $info, Exception $previous = null)
 		{
 			$this->info = $info;
-			parent::__construct($info['response_headers']['http_status_message'], $info['response_headers']['http_status_code']);
+			parent::__construct($message, $code, $previous);
 		}
 
-		function info() { return $this->info; }
+		public function getInfo() { return $this->info; }
+
+		public function __toString()
+		{
+			$backtrace = $this->getTrace();
+			return get_class($this) . ": [{$this->code}] {$this->message} in {$backtrace[0]['file']} on line {$backtrace[0]['line']}\n";
+		}
 	}
 
+	class CurlException extends Exception { }
+	class ResponseException extends Exception { }
 ?>
