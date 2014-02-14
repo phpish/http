@@ -11,7 +11,7 @@
 		return function ($method_uri, $query='', $payload='', &$response_headers=array(), $request_headers_override=array(), $curl_opts_override=array()) use ($base_uri, $instance_request_headers, $instance_curl_opts)
 		{
 			list($method, $uri) = explode(' ', $method_uri, 2);
-			$uri = ('/' == $uri[0]) ? $base_uri.$uri : $uri;
+			$uri = ('/' == $uri[0]) ? rtrim($base_uri).'/'.ltrim($uri, '/') : $uri;
 			$request_headers = $request_headers_override + $instance_request_headers;
 			$curl_opts = $curl_opts_override + $instance_curl_opts;
 			return request("$method $uri", $query, $payload, $response_headers, $request_headers, $curl_opts);
@@ -29,19 +29,20 @@
 		$error = curl_error($ch);
 		curl_close($ch);
 
-		if ($errno) throw new CurlException($error, $errno, compact('method', 'uri', 'query', 'request_headers', 'payload', 'curl_opts'));
+		$headers = $request_headers;
+		$request = compact('method', 'uri', 'query', 'headers', 'payload');
+
+		if ($errno) throw new CurlException($error, $errno, $request);
 
 		$header_size = $curl_info["header_size"];
 		$msg_header = substr($response, 0, $header_size);
 		$msg_body = substr($response, $header_size);
-
 		$response_headers = _http_client_response_headers($msg_header);
 		$http_status_message = $response_headers['http_status_message'];
 		$http_status_code = $response_headers['http_status_code'];
+		$response = array('headers'=>$response_headers, 'body'=>$msg_body);
 
-		if ($http_status_code >= 400) throw new ResponseException($http_status_message, $http_status_code, compact('method', 'uri', 'query', 'request_headers', 'payload', 'response_headers', 'msg_body', 'curl_opts'));
-
-
+		if ($http_status_code >= 400) throw new ResponseException($http_status_message, $http_status_code, $request, $response);
 
 		$msg_body = (false !== strpos($response_headers['content-type'], 'application/json')) ? json_decode($msg_body, true) : $msg_body;
 
@@ -145,15 +146,17 @@
 
 	class Exception extends \Exception
 	{
-		protected $info;
+		protected $request, $response;
 
-		function __construct($message, $code, $info, Exception $previous = null)
+		function __construct($message, $code, $request=array(), $response=array(), Exception $previous=null)
 		{
-			$this->info = $info;
+			$this->request = $request;
+			$this->response = $response;
 			parent::__construct($message, $code, $previous);
 		}
 
-		public function getInfo() { return $this->info; }
+		public function getRequest() { return $this->request; }
+		public function getResponse() { return $this->response; }
 
 		public function __toString()
 		{
