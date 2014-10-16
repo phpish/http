@@ -70,6 +70,7 @@
 				CURLOPT_USERAGENT => USERAGENT,
 				CURLOPT_CONNECTTIMEOUT => 30,
 				CURLOPT_TIMEOUT => 30,
+				CURLOPT_SSLVERSION => 1
 			);
 
 			$request_headers = $request_headers_assoc_lower = array();
