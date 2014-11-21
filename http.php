@@ -21,7 +21,8 @@
 	function request($method_uri, $query='', $payload='', &$response_headers=array(), $request_headers=array(), $curl_opts=array())
 	{
 		list($method, $uri) = explode(' ', $method_uri, 2);
-		$ch = curl_init(_http_client_request_uri($uri, $query));
+		$url = _http_client_request_uri($uri, $query);
+		$ch = curl_init($url);
 		_http_client_setopts($ch, $method, $payload, $request_headers, $curl_opts);
 		$response = curl_exec($ch);
 		$curl_info = curl_getinfo($ch);
@@ -149,7 +150,7 @@
 	{
 		protected $request, $response;
 
-		function __construct($message, $code, $request=array(), $response=array(), Exception $previous=null)
+		function __construct($message, $code, $request, $response=array(), Exception $previous=null)
 		{
 			$this->request = $request;
 			$this->response = $response;
@@ -167,5 +168,13 @@
 	}
 
 	class CurlException extends Exception { }
-	class ResponseException extends Exception { }
+	class ResponseException extends Exception
+	{
+		function __construct($message, $code, $request, $response=array(), Exception $previous=null)
+		{
+			$url = _http_client_request_uri($request['uri'], $request['query']);
+			$this->message = "$message ($url)";
+			parent::__construct($this->message, $code, $request, $response, $previous);
+		}
+	}
 ?>
