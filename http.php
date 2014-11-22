@@ -99,7 +99,7 @@
 						}
 						elseif (false !== strpos($request_headers_assoc['content-type'], 'application/json'))
 						{
-							$payload = json_encode($payload);
+							$payload = str_replace('\\/', '/', json_encode($payload));
 						}
 					}
 					else
