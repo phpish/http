@@ -163,7 +163,7 @@
 		public function __toString()
 		{
 			$backtrace = $this->getTrace();
-			return get_class($this) . ": [{$this->code}] {$this->message} in {$backtrace[0]['file']} on line {$backtrace[0]['line']}\n";
+			return get_class($this) . ": [{$this->code}] {$this->message} in {$backtrace[0]['file']} on line {$backtrace[0]['line']}";
 		}
 	}
 
