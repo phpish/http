@@ -11,7 +11,7 @@
 		return function ($method_uri, $query='', $payload='', &$response_headers=array(), $request_headers_override=array(), $curl_opts_override=array()) use ($base_uri, $instance_request_headers, $instance_curl_opts)
 		{
 			list($method, $uri) = explode(' ', $method_uri, 2);
-			$uri = ('/' == $uri[0]) ? rtrim($base_uri).'/'.ltrim($uri, '/') : $uri;
+			$uri = ('/' == $uri[0]) ? rtrim($base_uri, '/').$uri : $uri;
 			$request_headers = $request_headers_override + $instance_request_headers;
 			$curl_opts = $curl_opts_override + $instance_curl_opts;
 			return request("$method $uri", $query, $payload, $response_headers, $request_headers, $curl_opts);
